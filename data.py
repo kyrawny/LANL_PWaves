@@ -83,11 +83,6 @@ class FeatureGenerator(object):
         feature_dict['target'] = y
         feature_dict['segment'] = x
         feature_dict['seg_id'] = seg_id
-
-        # create features here
-        # for example:
-        # feature_dict['mean'] = np.mean(x)
-
         return feature_dict
 
     def generate(self):
