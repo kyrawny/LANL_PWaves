@@ -10,14 +10,11 @@ from torch.utils.data import Dataset
 from torch.utils.data import random_split
 
 class LANLDataset(Dataset):
-    def __init__(self, data, target, transforms=None, spec=False):
-        if not spec:
-            if transforms is not None:
-                raise Exception('No transforms without spec=True.')
-        self.spec = spec
-        self.transforms = transforms
+    def __init__(self, mode, data, target=None):
+        self.mode = mode
         self.data = data
-        self.target = target
+        if mode == 'train':
+            self.target = target
 
     def train_val_split(self, train_ratio, val_ratio):
         if (train_ratio + val_ratio != 1):
@@ -32,19 +29,16 @@ class LANLDataset(Dataset):
         'Denotes the total number of samples'
         return len(self.data)
 
-    def __getitem__(self, index, spec=False):
+    def __getitem__(self, index):
         'Generates one sample of data'
         if isinstance(index, torch.Tensor):
             index = index.item()
-        if self.spec:
-            s, _, _, _ = plt.specgram(self.data[index], Fs=1)
-            data = torch.Tensor(s).unsqueeze(0)
-            if self.transforms is not None:
-                data = self.transforms(data)
-        else:
-            data = torch.Tensor(self.data[index])
-        target = torch.Tensor([self.target[index]]).squeeze(0)
-        sample = {'data': data, 'target': target}
+        data = torch.Tensor(self.data[index])
+        if self.mode == 'train':
+            target = torch.Tensor([self.target[index]]).squeeze(0)
+            sample = {'data': data, 'target': target}
+        elif self.mode == 'test':
+            sample = {'data':data}
         return sample
 
 class FeatureGenerator(object):
